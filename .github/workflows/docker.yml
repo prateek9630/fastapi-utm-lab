@@ -21,8 +21,8 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t prateek9630/fastapi-utm:latest .
+          docker build -t pblencho/fastapi-utm:latest .
 
       - name: Push to Docker Hub
         run: |
-          docker push prateek9630/fastapi-utm:latest
+          docker push pblencho/fastapi-utm:latest
