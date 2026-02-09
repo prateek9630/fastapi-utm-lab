@@ -12,3 +12,11 @@ def root():
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+@app.get("/version")
+def version():
+    return {
+        "app": "fastapi-utm",
+        "version": "v3",
+        "ci_cd": "verified"
+    }
