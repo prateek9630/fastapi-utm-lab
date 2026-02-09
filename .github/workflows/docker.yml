@@ -19,9 +19,16 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      - name: Build Docker image
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image (ARM64)
         run: |
-          docker build -t pblencho/fastapi-utm:latest .
+          docker buildx build \
+            --platform linux/arm64 \
+            -t pblencho/fastapi-utm:latest \
+            --load \
+            .
 
       - name: Push to Docker Hub
         run: |
