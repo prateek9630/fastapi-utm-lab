@@ -1,4 +1,4 @@
-name: Build, Version, and Deploy to Kubernetes
+name: Build and Version Docker Image (Local Kind)
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build-push-deploy:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,7 +21,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build ARM64 image with new version
+      - name: Build ARM64 image with version
         run: |
           VERSION=$(date +'%Y%m%d%H%M%S')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
@@ -33,25 +33,14 @@ jobs:
             --load \
             .
 
-      - name: Push to Docker Hub
+      - name: Push images to Docker Hub
         run: |
           docker push pblencho/fastapi-utm:latest
           docker push pblencho/fastapi-utm:$VERSION
 
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v3
-
-      - name: Configure kubeconfig
+      - name: Print version for you
         run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
-
-      - name: Update Kubernetes image
-        run: |
-          kubectl set image deployment/fastapi-app \
-            fastapi=pblencho/fastapi-utm:$VERSION \
-            --record
-
-      - name: Restart rollout
-        run: |
-          kubectl rollout restart deployment fastapi-app
+          echo "========================================="
+          echo "NEW IMAGE TAG: pblencho/fastapi-utm:$VERSION"
+          echo "Use this in kubectl set image"
+          echo "========================================="
