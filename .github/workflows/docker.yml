@@ -1,4 +1,4 @@
-name: Build and Push Docker Image
+name: Build, Version, and Deploy to Kubernetes
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build-and-push:
+  build-push-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,7 +21,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build ARM64 image
+      - name: Build ARM64 image with new version
         run: |
           VERSION=$(date +'%Y%m%d%H%M%S')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
@@ -38,6 +38,20 @@ jobs:
           docker push pblencho/fastapi-utm:latest
           docker push pblencho/fastapi-utm:$VERSION
 
-      - name: Update Kubernetes image (for future AKS)
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Configure kubeconfig
         run: |
-          echo "New image: pblencho/fastapi-utm:$VERSION"
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+
+      - name: Update Kubernetes image
+        run: |
+          kubectl set image deployment/fastapi-app \
+            fastapi=pblencho/fastapi-utm:$VERSION \
+            --record
+
+      - name: Restart rollout
+        run: |
+          kubectl rollout restart deployment fastapi-app
