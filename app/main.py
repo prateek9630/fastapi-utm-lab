@@ -7,7 +7,10 @@ app.include_router(items.router)
 
 @app.get("/")
 def root():
-    return {"message": "CI/CD test successful — v2 🚀"}
+    return {
+        "message": "CI/CD cycle verified — v6 🚀",
+        "timestamp": "test-run-3"
+    }
 
 @app.get("/health")
 def health():
