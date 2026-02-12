@@ -1,9 +1,8 @@
-name: Build and Push to ACR
+name: Build and Deploy to AKS
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
 
 env:
   REGISTRY: fastapiacr1052.azurecr.io
@@ -14,18 +13,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout code
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 2. Enable cross-platform builds
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
-      - name: Set up Docker Buildx
+      - name: Set up Buildx
         uses: docker/setup-buildx-action@v3
 
-      # 3. Login to Azure Container Registry
       - name: Login to ACR
         uses: docker/login-action@v3
         with:
@@ -33,11 +29,24 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
-      # 4. Build and push MULTI-ARCH image
-      - name: Build and Push Image
+      - name: Generate version tag
+        id: vars
+        run: echo "TAG=$(date +%s)" >> $GITHUB_OUTPUT
+
+      - name: Build and push multi-arch image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.TAG }}
           platforms: linux/amd64,linux/arm64
+
+      - name: Update Kubernetes deployment
+        uses: azure/k8s-deploy@v5
+        with:
+          manifests: |
+            deployment.yaml
+            service.yaml
+          images: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.TAG }}
