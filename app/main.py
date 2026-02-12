@@ -1,14 +1,17 @@
 from fastapi import FastAPI
+from datetime import datetime
 from app.routers import items
+from app.db.database import Base, engine
 
-app = FastAPI(title="FastAPI UTM App")
+Base.metadata.create_all(bind=engine)
 
-app.include_router(items.router)
+app = FastAPI(title="AKS Production Demo")
 
-@app.get("/")
+VERSION = datetime.utcnow().isoformat()
+
 @app.get("/")
 def root():
-    return {"message": "Hello from Azure AKS 🚀"}
+    return {"message": "Production FastAPI on AKS 🚀"}
 
 @app.get("/health")
 def health():
@@ -16,8 +19,6 @@ def health():
 
 @app.get("/version")
 def version():
-    return {
-        "app": "fastapi-utm",
-        "version": "v3",
-        "ci_cd": "verified"
-    }
+    return {"deployed_at": VERSION}
+
+app.include_router(items.router)
