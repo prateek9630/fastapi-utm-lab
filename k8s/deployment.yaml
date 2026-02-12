@@ -16,24 +16,27 @@ spec:
         - name: data-volume
           persistentVolumeClaim:
             claimName: fastapi-data
-      containers:
-        volumeMounts:
-          - mountPath: /app
-            name: data-volume
-      - name: fastapi
-        image: IMAGE_PLACEHOLDER
-        ports:
-        - containerPort: 8000
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 8000
-          initialDelaySeconds: 5
-          periodSeconds: 5
 
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8000
-          initialDelaySeconds: 15
-          periodSeconds: 10
+      containers:
+        - name: fastapi
+          image: IMAGE_PLACEHOLDER
+          ports:
+            - containerPort: 8000
+
+          volumeMounts:
+            - mountPath: /app
+              name: data-volume
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 10
