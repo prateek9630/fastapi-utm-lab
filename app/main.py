@@ -6,11 +6,9 @@ app = FastAPI(title="FastAPI UTM App")
 app.include_router(items.router)
 
 @app.get("/")
+@app.get("/")
 def root():
-    return {
-        "message": "CI/CD cycle verified — v6 🚀",
-        "timestamp": "test-run-3"
-    }
+    return {"message": "Hello from Azure AKS 🚀"}
 
 @app.get("/health")
 def health():
