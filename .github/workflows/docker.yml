@@ -42,11 +42,12 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.TAG }}
           platforms: linux/amd64,linux/arm64
 
-      - name: Update Kubernetes deployment
-        uses: azure/k8s-deploy@v5
-        with:
-          manifests: |
-            deployment.yaml
-            service.yaml
-          images: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.TAG }}
+      - name: Set kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+
+      - name: Deploy to AKS
+        run: |
+          kubectl apply -f deployment.yaml
+          kubectl apply -f service.yaml
