@@ -1,4 +1,4 @@
-name: Build and Version Docker Image (Local Kind)
+name: Build and Version Docker Image (Reliable)
 
 on:
   push:
@@ -21,12 +21,13 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build ARM64 image with version
+      - name: Build fresh ARM64 image with version
         run: |
           VERSION=$(date +'%Y%m%d%H%M%S')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
           docker buildx build \
+            --no-cache \
             --platform linux/arm64 \
             -t pblencho/fastapi-utm:$VERSION \
             -t pblencho/fastapi-utm:latest \
