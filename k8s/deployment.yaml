@@ -12,7 +12,14 @@ spec:
       labels:
         app: fastapi
     spec:
+      volumes:
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: fastapi-data
       containers:
+        volumeMounts:
+          - mountPath: /app
+            name: data-volume
       - name: fastapi
         image: IMAGE_PLACEHOLDER
         ports:
